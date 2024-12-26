@@ -27,7 +27,7 @@ class Drone {
     });
 
     this.socket.on('error', (err) => {
-      console.error(`Socket error: ${err}`);
+      console.log(`Socket error: ${err}`);
     });
   }
 
