@@ -1,6 +1,6 @@
 import dgram from 'dgram';
 
-class Drone {
+class Tello {
   constructor() {
     this.localIp = '';
     this.localPort = 8889;
@@ -93,5 +93,5 @@ class Stats {
   }
 }
 
-export default Drone
+export default Tello
 
