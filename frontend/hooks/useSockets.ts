@@ -3,7 +3,16 @@ import React from "react";
 const useSockets = () => {
     const [socket, setSocket] = React.useState<null | WebSocket>(null);
     const [messages, setMessages] = React.useState<string[]>([])
-    console.log(messages)
+
+    const sendMessage = (message: string) => {
+        if (socket) {
+            socket.send(JSON.stringify({
+                "com":[message,0.564],
+                "time": new Date().getTime()
+            }))
+        }
+    }
+    
     React.useEffect(() => {
         const newSocket = new WebSocket("ws://localhost:3000");
 
@@ -33,7 +42,9 @@ const useSockets = () => {
         };
     }, []);
 
-    return socket; // Return the WebSocket instance
+    return {
+        socket, messages, sendMessage
+    }; 
 };
 
 export default useSockets;

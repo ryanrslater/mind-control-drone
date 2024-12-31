@@ -3,7 +3,7 @@ import { WebSocketServer } from 'ws';
 import Tello from './lib/tello.js';
 import connector from './lib/connector.js'
 
-const tello = new Tello()
+// const tello = new Tello()
 const server = createServer()
 const wss = new WebSocketServer({ server });
 
@@ -26,7 +26,7 @@ wss.on('connection', function connection(ws) {
 });
 
 wss.on('close', () => {
-  tello.onClose()
+  // tello.onClose()
 })
   server.listen(3000)
 
