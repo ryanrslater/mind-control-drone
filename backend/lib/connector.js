@@ -20,6 +20,8 @@ const connector = (act, pow) => {
             return ''
         case 'rotateRight':
             return ''
+        case 'command':
+            return 'command'
         default:
             return '';
     }
