@@ -1,0 +1,18 @@
+.wrapper {
+  width: 800px;
+}
+
+.content {
+  display: flex;
+}
+
+.logs {
+  flex: 2;
+}
+
+.buttons {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

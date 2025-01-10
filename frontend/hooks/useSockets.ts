@@ -1,50 +1,58 @@
-import React from "react";
+import React from 'react';
+
+type TelloLog = {
+  command: string;
+  index: number;
+  response: number;
+};
+
+type Messages = {
+  tello: TelloLog[];
+};
 
 const useSockets = () => {
-    const [socket, setSocket] = React.useState<null | WebSocket>(null);
-    const [messages, setMessages] = React.useState<string[]>([])
-
-    const sendMessage = (message: string) => {
-        if (socket) {
-            socket.send(JSON.stringify({
-                "com":[message,0.564],
-                "time": new Date().getTime()
-            }))
-        }
+  const [socket, setSocket] = React.useState<null | WebSocket>(null);
+  const [messages, setMessages] = React.useState<Messages | null>(null);
+  console.log(messages);
+  const sendMessage = (message: string) => {
+    if (socket) {
+      socket.send(
+        JSON.stringify({
+          com: [message, 0.564],
+          time: new Date().getTime() / 1000
+        })
+      );
     }
-    
-    React.useEffect(() => {
-        const newSocket = new WebSocket("ws://localhost:3000");
+  };
 
-        // Handle messages
-        const handleMessage = (event: MessageEvent) => {
-            setMessages((prev) => [...prev, event.data])
-            console.log("Message from server: ", event.data);
-        };
+  React.useEffect(() => {
+    const newSocket = new WebSocket('ws://localhost:3000');
 
-        // Handle errors
-        const handleError = (error: Event) => {
-            console.error("WebSocket error: ", error);
-        };
+    const handleMessage = (event: MessageEvent) => {
+      setMessages(JSON.parse(event.data));
+    };
 
-        // Attach listeners
-        newSocket.addEventListener('message', handleMessage)
-        newSocket.addEventListener("error", handleError);
+    const handleError = (error: Event) => {
+      console.error('WebSocket error: ', error);
+    };
 
-        // Update socket state
-        setSocket(newSocket);
+    newSocket.addEventListener('message', handleMessage);
+    newSocket.addEventListener('error', handleError);
 
-        // Cleanup
-        return () => {
-            newSocket.removeEventListener("message", handleMessage);
-            newSocket.removeEventListener("error", handleError);
-            newSocket.close();
-        };
-    }, []);
+    setSocket(newSocket);
 
-    return {
-        socket, messages, sendMessage
-    }; 
+    return () => {
+      newSocket.removeEventListener('message', handleMessage);
+      newSocket.removeEventListener('error', handleError);
+      newSocket.close();
+    };
+  }, []);
+
+  return {
+    socket,
+    messages,
+    sendMessage
+  };
 };
 
 export default useSockets;

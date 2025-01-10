@@ -1,32 +1,36 @@
 import { createServer } from 'http';
-import { WebSocketServer } from 'ws'; 
+import WebSocket, { WebSocketServer } from 'ws'; 
 import Tello from './lib/tello.js';
 import connector from './lib/connector.js'
 
-// const tello = new Tello()
+const tello = new Tello()
 const server = createServer()
 const wss = new WebSocketServer({ server });
+// const socket = new WebSocket('wss://localhost:6868')
+
+
 
 wss.on('connection', function connection(ws) {
   ws.on('error', console.error);
-
-  ws.on('message', function message(data) {
-    console.log('received: %s', data);
+  ws.on('message', async(data) => {
     const message = JSON.parse(data)
-    console.log(message)
     const command = connector(message.com[0], message.com[1])
-    // tello.send(command)
+    try {
+      await tello.sendCommand(command)
+    } catch (e) {
+      console.log(e)
+    }
+    const logs = tello.getLog()
     wss.clients.forEach((w) => {
-      w.send(command)
+      w.send(JSON.stringify({tello: logs}))
     })
-
   });
 
-  ws.send('something');
+  ws.send(JSON.stringify({tello: tello.getLog()}));
 });
 
 wss.on('close', () => {
-  // tello.onClose()
+  tello.onClose()
 })
   server.listen(3000)
 
