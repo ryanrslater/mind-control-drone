@@ -17,7 +17,7 @@ const server = createServer();
 const wss = new WebSocketServer({ server });
 
 eeg.listenForWarnings();
-eeg.sub(['eeg']);
+eeg.sub(['com']);
 
 eeg.socket.on('message', async (data) => {
   const command = drone.formatter(data);
