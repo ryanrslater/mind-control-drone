@@ -1,26 +1,29 @@
 import WebSocket from 'ws';
-/**
- * This class handle:
- *  - create websocket connection
- *  - handle request for : headset , request access, control headset ...
- *  - handle 2 main flows : sub and train flow
- *  - use async/await and Promise for request need to be run on sync
- */
 
 const WARNING_CODE_HEADSET_DISCOVERY_COMPLETE = 142;
 const WARNING_CODE_HEADSET_CONNECTED = 104;
 
+/** Interacting Emotiv EEG's, this will require keys from the Emotive Launcher */
 class Eeg {
+  /**
+   *
+   * @param {String} user.licence
+   * @param {String} user.clientId
+   * @param {String} user.clientSecret
+   * @param {String} user.debit
+   * @param {string?} socketUrl Should be wss://localhost:6868 by default
+   */
   constructor(user, socketUrl) {
-    // create socket
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-    this.socket = new WebSocket(socketUrl);
-
-    // read user infor
+    this.socket = new WebSocket(socketUrl ?? 'wss://localhost:6868');
     this.user = user;
     this.isHeadsetConnected = false;
   }
 
+  /**
+   * Queries the Headset ID
+   * @returns {Promise<number>}
+   */
   queryHeadsetId() {
     return new Promise((resolve, reject) => {
       const QUERY_HEADSET_ID = 2;
@@ -41,8 +44,6 @@ class Eeg {
       socket.on('message', (data) => {
         try {
           if (JSON.parse(data)['id'] == QUERY_HEADSET_ID) {
-            // console.log(data)
-            // console.log(JSON.parse(data)['result'].length)
             if (JSON.parse(data)['result'].length > 0) {
               JSON.parse(data)['result'].forEach((headset) => {
                 if (headset['status'] === 'connected') {
@@ -80,7 +81,6 @@ class Eeg {
         id: REQUEST_ACCESS_ID
       };
 
-      // console.log('start send request: ',requestAccessRequest)
       socket.send(JSON.stringify(requestAccessRequest));
 
       socket.on('message', (data) => {
@@ -93,7 +93,7 @@ class Eeg {
     });
   }
 
-  authorize() {
+  authorise() {
     let socket = this.socket;
     let user = this.user;
     return new Promise(function (resolve, reject) {
@@ -115,7 +115,6 @@ class Eeg {
           if (JSON.parse(data)['id'] == AUTHORIZE_ID) {
             let cortexToken = JSON.parse(data)['result']['cortexToken'];
             resolve(cortexToken);
-            // Call controlDevice("refresh") when authorization is successful
             this.refreshHeadsetList();
           }
         } catch (error) {}
@@ -216,7 +215,6 @@ class Eeg {
         try {
           if (JSON.parse(data)['id'] == CREATE_RECORD_REQUEST_ID) {
             console.log('CREATE RECORD RESULT --------------------------------');
-            // console.log(data)
             let recordId = JSON.parse(data)['result']['record']['uuid'];
             console.log('=======> recordId:', recordId);
             resolve(recordId);

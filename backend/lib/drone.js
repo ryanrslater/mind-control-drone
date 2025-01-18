@@ -1,20 +1,19 @@
 import dgram from 'dgram';
 
+/** Tello Ryze controlling drone, you must connect to their network */
 class Drone {
   constructor() {
     this.localIp = '';
     this.localPort = 8889;
-    this.socket = dgram.createSocket('udp4'); // socket for sending commands
+    this.socket = dgram.createSocket('udp4');
     this.socket.bind(this.localPort, this.localIp);
 
-    // Tello's IP and port
     this.telloIp = '192.168.10.1';
     this.telloPort = 8889;
     this.telloAddress = { address: this.telloIp, port: this.telloPort };
     this.log = [];
-    this.MAX_TIMEOUT = 15000; // in milliseconds
+    this.MAX_TIMEOUT = 15000;
 
-    // Start listening for responses
     this._startReceiveThread();
   }
 
@@ -25,7 +24,6 @@ class Drone {
         this.log[this.log.length - 1].addResponse(msg.toString());
       }
     });
-
     this.socket.on('error', (err) => {
       console.log(`Socket error: ${err}`);
     });
@@ -35,8 +33,6 @@ class Drone {
     return new Promise((resolve, reject) => {
       const stats = new Stats(command, this.log.length);
       this.log.push(stats);
-
-      // Send the command
       this.socket.send(command, this.telloPort, this.telloIp, (err) => {
         if (err) {
           reject(`Error sending command: ${err}`);
@@ -45,7 +41,6 @@ class Drone {
         console.log(`Sending command: ${command} to ${this.telloIp}`);
       });
 
-      // Wait for a response or timeout
       const start = Date.now();
       const interval = setInterval(() => {
         if (stats.gotResponse()) {
@@ -62,7 +57,6 @@ class Drone {
   }
 
   onClose() {
-    // Clean up resources
     this.socket.close(() => {
       console.log('Socket closed.');
     });
