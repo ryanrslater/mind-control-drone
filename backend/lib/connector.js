@@ -1,5 +1,5 @@
-const connector = (act, pow) => {
-  switch (act) {
+const connector = (msg) => {
+  switch (msg.com[0]) {
     case 'neutral':
       return '';
     case 'takeoff':
