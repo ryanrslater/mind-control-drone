@@ -5,9 +5,9 @@ import Eeg from './lib/eeg.js';
 
 let socketUrl = 'wss://localhost:6868';
 let user = {
-  license: 'your license',
-  clientId: 'your clientId',
-  clientSecret: 'your client secret',
+  license: process.env.EEG_LICENCE,
+  clientId: process.env.EEG_CLIENT_ID,
+  clientSecret: process.env.EEG_CLIENT_SECRET,
   debit: 1
 };
 
@@ -37,13 +37,15 @@ wss.on('connection', function connection(ws) {
     } catch (e) {
       console.log(e);
     }
-    const logs = drone.getLog();
-    wss.clients.forEach((w) => {
-      w.send(JSON.stringify({ tello: logs }));
-    });
   });
-
   ws.send(JSON.stringify({ tello: tello.getLog() }));
+});
+
+drone.socket.on('message', () => {
+  const logs = drone.getLog();
+  wss.clients.forEach((w) => {
+    w.send(JSON.stringify({ tello: logs }));
+  });
 });
 
 wss.on('close', () => {
