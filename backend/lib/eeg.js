@@ -10,7 +10,7 @@ import WebSocket from 'ws';
 const WARNING_CODE_HEADSET_DISCOVERY_COMPLETE = 142;
 const WARNING_CODE_HEADSET_CONNECTED = 104;
 
-class Cortex {
+class Eeg {
   constructor(user, socketUrl) {
     // create socket
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
@@ -743,7 +743,7 @@ let user = {
   debit: 1
 };
 
-export default Context;
+export default Eeg;
 
 let c = new Cortex(user, socketUrl);
 c.listenForWarnings();

@@ -1,34 +1,43 @@
 import { createServer } from 'http';
-import WebSocket, { WebSocketServer } from 'ws';
-import Tello from './lib/tello.js';
-import connector from './lib/connector.js';
+import { WebSocketServer } from 'ws';
+import Drone from './lib/drone.js';
+import Eeg from './lib/eeg.js';
 
-const tello = new Tello();
+let socketUrl = 'wss://localhost:6868';
+let user = {
+  license: 'your license',
+  clientId: 'your clientId',
+  clientSecret: 'your client secret',
+  debit: 1
+};
+
+const drone = new Drone();
+const eeg = new Eeg(user, socketUrl);
 const server = createServer();
 const wss = new WebSocketServer({ server });
-// const socket = new WebSocket('wss://localhost:6868')
 
-let act = '';
-let pow = '';
+eeg.listenForWarnings();
+eeg.sub(['eeg']);
 
-const setState = (cmd) => {
-  if (cmd != act) {
-    act = cmd;
+eeg.socket.on('message', async (data) => {
+  const command = drone.formatter(data);
+  try {
+    await drone.sendCommand(command);
+  } catch (e) {
+    console.log(e);
   }
-};
+});
 
 wss.on('connection', function connection(ws) {
   ws.on('error', console.error);
   ws.on('message', async (data) => {
-    const message = JSON.parse(data);
-    const command = connector(message);
-    setState(command);
+    const command = drone.formatter(data);
     try {
-      await tello.sendCommand(command);
+      await drone.sendCommand(command);
     } catch (e) {
       console.log(e);
     }
-    const logs = tello.getLog();
+    const logs = drone.getLog();
     wss.clients.forEach((w) => {
       w.send(JSON.stringify({ tello: logs }));
     });
